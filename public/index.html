@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AEVOR · Portal de Distribuidores</title>
+<style>
+  :root{
+    --navy:#0f1d3a; --navy2:#16264a; --ink:#1e293b; --mut:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fb; --gold:#c8a04e; --gold2:#b08d3e;
+    --green:#047857; --greenbg:#ecfdf5; --red:#b91c1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5}
+  .hidden{display:none !important}
+
+  /* ---- Login ---- */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(120% 120% at 50% 0%, #16264a 0%, #0f1d3a 60%, #0a1428 100%)}
+  .lcard{width:100%;max-width:390px;background:#fff;border-radius:16px;padding:34px 30px;
+    box-shadow:0 24px 60px rgba(8,16,34,.35)}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--gold)}
+  .brand b{font-size:15px;letter-spacing:.14em;color:var(--navy);font-weight:800}
+  .ltitle{font-size:21px;font-weight:800;color:var(--navy);margin:14px 0 3px}
+  .lsub{color:var(--mut);font-size:12.5px;margin-bottom:22px}
+  label{display:block;font-size:11px;font-weight:700;color:var(--mut);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .inp{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;
+    font-size:14px;margin-bottom:15px;transition:border-color .15s}
+  .inp:focus{outline:none;border-color:var(--gold)}
+  .btn{width:100%;padding:12px;border:none;border-radius:9px;font-size:14px;font-weight:700;
+    cursor:pointer;background:var(--navy);color:#fff;transition:background .15s}
+  .btn:hover{background:var(--navy2)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .lerr{color:var(--red);font-size:12.5px;margin-top:12px;min-height:16px;text-align:center}
+  .lfoot{margin-top:20px;text-align:center;font-size:11px;color:var(--mut)}
+
+  /* ---- App ---- */
+  header{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;
+    justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20}
+  header .l{display:flex;align-items:center;gap:11px}
+  header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+  header .nm{font-weight:800;letter-spacing:.13em;font-size:13px}
+  header .r{display:flex;align-items:center;gap:14px;font-size:12.5px}
+  .tierbadge{background:var(--gold);color:#23180a;font-weight:800;padding:3px 10px;
+    border-radius:20px;font-size:11px;letter-spacing:.03em}
+  .lo{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;
+    padding:5px 12px;border-radius:7px;cursor:pointer;font-size:12px}
+  .lo:hover{background:rgba(255,255,255,.12)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 60px}
+  .meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+    gap:10px;margin-bottom:16px}
+  .meta h1{font-size:19px;color:var(--navy);font-weight:800}
+  .stamp{font-size:12px;color:var(--mut)}
+  .search{padding:9px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;width:240px;max-width:50vw}
+  .search:focus{outline:none;border-color:var(--gold)}
+
+  .tablecard{background:#fff;border-radius:13px;border:1px solid var(--line);overflow:hidden}
+  .tscroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:760px}
+  thead th{background:var(--navy);color:#fff;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.04em;padding:11px 12px;text-align:left;font-weight:700;white-space:nowrap}
+  thead th.r{text-align:right}thead th.c{text-align:center}
+  th.mh{background:#064e3b}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:hover{background:#fafcff}
+  tr.sel{background:#fffbeb}
+  tr.sel:hover{background:#fff7d6}
+  .catrow td{background:#eef2f8;font-weight:800;color:var(--navy);font-size:11px;
+    text-transform:uppercase;letter-spacing:.05em;padding:7px 12px}
+  .mn{font-weight:700;color:var(--ink)}
+  .mi{font-size:11px;color:var(--mut)}
+  .r{text-align:right}.c{text-align:center}
+  .pvp{color:var(--mut)}
+  .dist{font-weight:800;color:var(--navy)}
+  .marg{font-weight:800;color:var(--green);background:var(--greenbg);white-space:nowrap}
+  .chk{width:17px;height:17px;accent-color:var(--gold);cursor:pointer}
+  .qty{width:54px;padding:5px 6px;border:1.5px solid var(--line);border-radius:6px;
+    font-size:13px;text-align:center}
+  .qty:focus{outline:none;border-color:var(--gold)}
+
+  /* ---- Quote dock ---- */
+  .dock{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+    box-shadow:0 -10px 30px rgba(8,16,34,.10);transform:translateY(calc(100% - 52px));
+    transition:transform .25s ease;z-index:30}
+  .dock.open{transform:translateY(0)}
+  .dhead{height:52px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 18px;cursor:pointer}
+  .dhead .sum{display:flex;align-items:center;gap:16px;font-size:13px}
+  .dhead .sum b{color:var(--navy)}
+  .dhead .gain{color:var(--green);font-weight:800}
+  .dbody{max-height:46vh;overflow-y:auto;padding:6px 18px 18px;border-top:1px solid var(--line)}
+  .qline{display:grid;grid-template-columns:1fr auto auto auto auto;gap:12px;align-items:center;
+    padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+  .qline .qn{font-weight:600}
+  .qline .qc{color:var(--mut)}
+  .qline .qg{color:var(--green);font-weight:700}
+  .qtot{display:flex;justify-content:flex-end;gap:22px;padding:12px 0 4px;font-size:13px}
+  .qtot .gain{color:var(--green);font-weight:800}
+  .dock .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+  .ba{padding:10px 16px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer}
+  .ba.pdf{background:var(--gold);color:#23180a}
+  .ba.pdf:hover{background:var(--gold2)}
+  .ba.clear{background:#eef2f8;color:var(--navy)}
+  .empty{color:var(--mut);font-style:italic;padding:14px 0;text-align:center}
+
+  .loading{text-align:center;color:var(--mut);padding:50px 0}
+  @media(max-width:640px){
+    .qline{grid-template-columns:1fr auto;gap:6px}
+    .qline .qc,.qline .qg{grid-column:1/-1;font-size:11px}
+    .search{width:160px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="login">
+  <div class="lcard">
+    <div class="brand"><span class="dot"></span><b>AEVOR ROBOTICS</b></div>
+    <div class="ltitle">Portal de Distribuidores</div>
+    <div class="lsub">Acceso a precios y solicitud de presupuesto. Distribuidor Exclusivo Gold Unitree.</div>
+    <label for="u">Usuario</label>
+    <input class="inp" id="u" type="text" autocomplete="username" placeholder="tu-usuario">
+    <label for="p">Contraseña</label>
+    <input class="inp" id="p" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn" id="loginBtn">Entrar</button>
+    <div class="lerr" id="lerr"></div>
+    <div class="lfoot">AEVOR ROBOTICS, S.L. · La Nucía, Alicante</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="hidden">
+  <header>
+    <div class="l"><span class="dot"></span><span class="nm">AEVOR ROBOTICS</span></div>
+    <div class="r">
+      <span id="distName"></span>
+      <span class="tierbadge" id="tierBadge"></span>
+      <button class="lo" id="logout">Salir</button>
+    </div>
+  </header>
+  <div class="wrap">
+    <div class="meta">
+      <h1>Lista de precios</h1>
+      <input class="search" id="search" type="search" placeholder="Buscar modelo…">
+    </div>
+    <div class="stamp" id="stamp"></div>
+    <div id="tableHost" class="tablecard" style="margin-top:10px">
+      <div class="loading">Cargando precios…</div>
+    </div>
+  </div>
+
+  <!-- Quote dock -->
+  <div class="dock" id="dock">
+    <div class="dhead" id="dhead">
+      <div class="sum">
+        <span>Presupuesto: <b id="qCnt">0</b> productos · <b id="qUn">0</b> uds.</span>
+        <span class="gain">Tu margen: <span id="qGain">0,00 €</span></span>
+      </div>
+      <span style="color:var(--mut);font-size:12px" id="dockToggle">▲ abrir</span>
+    </div>
+    <div class="dbody">
+      <div id="qLines"><div class="empty">Marca productos en la tabla para añadirlos al presupuesto.</div></div>
+      <div class="actions">
+        <button class="ba clear" id="clearBtn">Vaciar</button>
+        <button class="ba pdf" id="pdfBtn">Generar PDF del presupuesto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmt = n => (Number(n)||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+let TOKEN = sessionStorage.getItem('aevor_tok') || '';
+let DATA = null;          // {tier,tierPct,updatedAt,products:[]}
+const sel = {};           // modelo -> qty
+
+// ---------- Login ----------
+const $ = id => document.getElementById(id);
+async function doLogin(){
+  const btn=$('loginBtn'); const err=$('lerr'); err.textContent='';
+  const user=$('u').value.trim(), password=$('p').value;
+  if(!user||!password){err.textContent='Indica usuario y contraseña.';return;}
+  btn.disabled=true; btn.textContent='Entrando…';
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user,password})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error de acceso');
+    TOKEN=j.token; sessionStorage.setItem('aevor_tok',TOKEN);
+    enterApp();
+  }catch(e){ err.textContent=e.message; }
+  finally{ btn.disabled=false; btn.textContent='Entrar'; }
+}
+$('loginBtn').onclick=doLogin;
+$('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+$('u').addEventListener('keydown',e=>{if(e.key==='Enter')$('p').focus();});
+
+$('logout').onclick=()=>{ sessionStorage.removeItem('aevor_tok'); TOKEN=''; location.reload(); };
+
+// ---------- App ----------
+async function enterApp(){
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await loadPrices();
+}
+async function loadPrices(){
+  try{
+    const r=await fetch('/api/prices',{headers:{'Authorization':'Bearer '+TOKEN}});
+    if(r.status===401){ sessionStorage.removeItem('aevor_tok'); location.reload(); return; }
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error');
+    DATA=j;
+    renderHead(); renderTable();
+  }catch(e){
+    $('tableHost').innerHTML='<div class="loading">No se pudieron cargar los precios. '+e.message+'</div>';
+  }
+}
+function renderHead(){
+  $('distName').textContent='';
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+TOKEN}}).then(r=>r.json()).then(m=>{
+    $('distName').textContent=m.name||'';
+  }).catch(()=>{});
+  $('tierBadge').textContent='Nivel '+DATA.tier+' · '+DATA.tierPct+'%';
+  if(DATA.updatedAt){
+    $('stamp').textContent='Precios actualizados: '+new Date(DATA.updatedAt).toLocaleString('es-ES')
+      +' · '+DATA.count+' productos';
+  }else{
+    $('stamp').textContent=DATA.count+' productos';
+  }
+}
+function renderTable(){
+  const q=($('search').value||'').toLowerCase();
+  const rows = DATA.products.filter(p=>{
+    if(!q) return true;
+    return (p.modelo+' '+p.nombre+' '+p.cat).toLowerCase().includes(q);
+  });
+  let html='<div class="tscroll"><table><thead><tr>'
+    +'<th class="c">Sel.</th><th class="c">Uds.</th><th>Modelo</th>'
+    +'<th class="r">PVP</th><th class="r">Tu precio</th><th class="r mh">Tu margen</th>'
+    +'</tr></thead><tbody>';
+  let lastCat='';
+  rows.forEach(p=>{
+    if(p.cat && p.cat!==lastCat){ lastCat=p.cat; html+='<tr class="catrow"><td colspan="6">'+esc(p.cat)+'</td></tr>'; }
+    const checked = sel[p.modelo]!==undefined;
+    const qty = sel[p.modelo]||1;
+    html+='<tr class="'+(checked?'sel':'')+'" data-m="'+esc(p.modelo)+'">'
+      +'<td class="c"><input type="checkbox" class="chk" '+(checked?'checked':'')+' data-m="'+esc(p.modelo)+'"></td>'
+      +'<td class="c"><input type="number" class="qty" min="1" value="'+qty+'" data-m="'+esc(p.modelo)+'"></td>'
+      +'<td><div class="mn">'+esc(p.nombre)+'</div>'+(p.modelo!==p.nombre?'<div class="mi">'+esc(p.modelo)+'</div>':'')+'</td>'
+      +'<td class="r pvp">'+fmt(p.pvp)+'</td>'
+      +'<td class="r dist">'+fmt(p.dist)+'</td>'
+      +'<td class="r marg">'+fmt(p.margen)+'</td>'
+    +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  if(rows.length===0) html='<div class="loading">Sin resultados para “'+esc(q)+'”.</div>';
+  $('tableHost').innerHTML=html;
+  // wire
+  $('tableHost').querySelectorAll('.chk').forEach(c=>c.onchange=onCheck);
+  $('tableHost').querySelectorAll('.qty').forEach(c=>c.oninput=onQty);
+}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function prod(m){return DATA.products.find(p=>p.modelo===m);}
+
+function onCheck(e){
+  const m=e.target.getAttribute('data-m');
+  if(e.target.checked){ sel[m]=sel[m]||1; } else { delete sel[m]; }
+  e.target.closest('tr').classList.toggle('sel',e.target.checked);
+  updateDock();
+}
+function onQty(e){
+  const m=e.target.getAttribute('data-m');
+  const v=Math.max(1,parseInt(e.target.value,10)||1);
+  if(sel[m]!==undefined) sel[m]=v;
+  updateDock();
+}
+$('search').oninput=renderTable;
+
+// ---------- Quote dock ----------
+$('dhead').onclick=()=>{
+  const d=$('dock'); d.classList.toggle('open');
+  $('dockToggle').textContent=d.classList.contains('open')?'▼ cerrar':'▲ abrir';
+};
+$('clearBtn').onclick=()=>{ for(const k in sel)delete sel[k]; renderTable(); updateDock(); };
+
+function quoteRows(){
+  return Object.keys(sel).map(m=>{
+    const p=prod(m); if(!p)return null;
+    const qty=sel[m];
+    return {modelo:p.modelo,nombre:p.nombre,qty,pvp:p.pvp,dist:p.dist,
+      margen:p.margen,subtotal:Math.round(p.dist*qty*100)/100,
+      subPvp:Math.round(p.pvp*qty*100)/100};
+  }).filter(Boolean);
+}
+function updateDock(){
+  const rows=quoteRows();
+  let totDist=0,totPvp=0,un=0;
+  rows.forEach(r=>{totDist+=r.subtotal;totPvp+=r.subPvp;un+=r.qty;});
+  const gain=Math.round((totPvp-totDist)*100)/100;
+  $('qCnt').textContent=rows.length; $('qUn').textContent=un; $('qGain').textContent=fmt(gain);
+  if(rows.length===0){
+    $('qLines').innerHTML='<div class="empty">Marca productos en la tabla para añadirlos al presupuesto.</div>';
+    return;
+  }
+  let html='';
+  rows.forEach(r=>{
+    html+='<div class="qline"><span class="qn">'+esc(r.nombre)+'</span>'
+      +'<span class="qc">x'+r.qty+'</span>'
+      +'<span class="qc">PVP '+fmt(r.pvp)+'</span>'
+      +'<span class="qg">Margen '+fmt(r.pvp-r.dist)+'</span>'
+      +'<span><b>'+fmt(r.subtotal)+'</b></span></div>';
+  });
+  html+='<div class="qtot"><span>PVP total: '+fmt(totPvp)+'</span>'
+    +'<span>Tu coste: <b>'+fmt(totDist)+'</b></span>'
+    +'<span class="gain">Tu margen: '+fmt(gain)+'</span></div>';
+  $('qLines').innerHTML=html;
+}
+
+// ---------- PDF ----------
+$('pdfBtn').onclick=()=>{
+  const rows=quoteRows();
+  if(rows.length===0){alert('Marca al menos un producto.');return;}
+  let totDist=0,totPvp=0,un=0,body='';
+  rows.forEach(r=>{
+    totDist+=r.subtotal;totPvp+=r.subPvp;un+=r.qty;
+    body+='<tr><td>'+esc(r.nombre)+(r.modelo!==r.nombre?' <span style="color:#64748b">('+esc(r.modelo)+')</span>':'')+'</td>'
+      +'<td class="c">'+r.qty+'</td><td class="r">'+fmt(r.pvp)+'</td>'
+      +'<td class="r">'+fmt(r.dist)+'</td><td class="r g">'+fmt(r.pvp-r.dist)+'</td>'
+      +'<td class="r">'+fmt(r.subtotal)+'</td></tr>';
+  });
+  const gain=totPvp-totDist;
+  const today=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  const name=$('distName').textContent||'';
+  const css='body{font-family:Arial,Helvetica,sans-serif;color:#1e293b;margin:26px;font-size:12px}'
+    +'h1{font-size:18px;color:#0f1d3a;margin:0 0 2px}.s{color:#64748b;font-size:11px;margin-bottom:14px}'
+    +'.m{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;margin:8px 0 14px}.m b{color:#0f1d3a}'
+    +'table{width:100%;border-collapse:collapse;margin-top:6px}'
+    +'th{background:#0f1d3a;color:#fff;font-size:10px;text-transform:uppercase;padding:7px 8px;text-align:left}'
+    +'td{padding:7px 8px;border-bottom:1px solid #e2e8f0}.c{text-align:center}.r{text-align:right}'
+    +'.g{color:#047857;font-weight:700}tfoot td{border-top:2px solid #0f1d3a;font-weight:700;background:#f8fafc}'
+    +'.tg{color:#047857}.n{margin-top:13px;font-size:10px;color:#64748b}@media print{body{margin:12mm}}';
+  const html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto</title>'
+    +'<style>'+css+'</style></head><body>'
+    +'<h1>Solicitud de Presupuesto · Unitree Robotics</h1>'
+    +'<div class="s">AEVOR ROBOTICS, S.L. · SynergyTech · Distribuidor Exclusivo Gold Unitree</div>'
+    +'<div class="m"><div><b>Distribuidor:</b> '+esc(name)+'</div><div><b>Nivel:</b> '+DATA.tier+' ('+DATA.tierPct+'%)</div>'
+    +'<div><b>Fecha:</b> '+today+'</div></div>'
+    +'<table><thead><tr><th>Producto</th><th class="c">Uds.</th><th class="r">PVP</th>'
+    +'<th class="r">Tu precio</th><th class="r">Margen/ud.</th><th class="r">Subtotal</th></tr></thead>'
+    +'<tbody>'+body+'</tbody><tfoot><tr><td colspan="2">TOTAL ('+un+' uds.)</td>'
+    +'<td class="r">'+fmt(totPvp)+'</td><td class="r">'+fmt(totDist)+'</td>'
+    +'<td class="r tg">'+fmt(gain)+'</td><td class="r">'+fmt(totDist)+'</td></tr></tfoot></table>'
+    +'<div class="n">PVP = precio de venta recomendado (IVA incl.). Tu precio = coste neto distribuidor. '
+    +'Margen = PVP − tu precio. Precios orientativos sujetos a confirmación por AEVOR ROBOTICS, S.L.</div>'
+    +'</body></html>';
+  const w=window.open('','_blank');
+  if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
+  w.document.open();w.document.write(html);w.document.close();
+  setTimeout(()=>{w.focus();w.print();},350);
+};
+
+// ---------- Boot ----------
+if(TOKEN){
+  fetch('/api/me',{headers:{'Authorization':'Bearer '+TOKEN}}).then(r=>{
+    if(r.ok){ enterApp(); } else { sessionStorage.removeItem('aevor_tok'); }
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>
