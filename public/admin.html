@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AEVOR · Administración de Distribuidores</title>
+<style>
+  :root{
+    --navy:#0f1d3a; --navy2:#16264a; --ink:#1e293b; --mut:#64748b;
+    --line:#e2e8f0; --bg:#f6f8fb; --gold:#c8a04e; --gold2:#b08d3e;
+    --green:#047857; --greenbg:#ecfdf5; --red:#b91c1c; --redbg:#fef2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5}
+  .hidden{display:none !important}
+
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(120% 120% at 50% 0%, #16264a 0%, #0f1d3a 60%, #0a1428 100%)}
+  .lcard{width:100%;max-width:370px;background:#fff;border-radius:16px;padding:34px 30px;
+    box-shadow:0 24px 60px rgba(8,16,34,.35)}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--gold)}
+  .brand b{font-size:14px;letter-spacing:.14em;color:var(--navy);font-weight:800}
+  .ltitle{font-size:20px;font-weight:800;color:var(--navy);margin:14px 0 3px}
+  .lsub{color:var(--mut);font-size:12.5px;margin-bottom:22px}
+  label{display:block;font-size:11px;font-weight:700;color:var(--mut);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .inp{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;
+    font-size:14px;margin-bottom:15px;transition:border-color .15s;background:#fff}
+  .inp:focus{outline:none;border-color:var(--gold)}
+  select.inp{cursor:pointer}
+  .btn{width:100%;padding:12px;border:none;border-radius:9px;font-size:14px;font-weight:700;
+    cursor:pointer;background:var(--navy);color:#fff;transition:background .15s}
+  .btn:hover{background:var(--navy2)}.btn:disabled{opacity:.6;cursor:default}
+  .lerr{color:var(--red);font-size:12.5px;margin-top:12px;min-height:16px;text-align:center}
+
+  header{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;
+    justify-content:space-between;position:sticky;top:0;z-index:20}
+  header .l{display:flex;align-items:center;gap:11px}
+  header .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+  header .nm{font-weight:800;letter-spacing:.13em;font-size:13px}
+  header .tag{font-size:11px;opacity:.8;margin-left:8px}
+  .lo{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;
+    padding:5px 12px;border-radius:7px;cursor:pointer;font-size:12px}
+  .lo:hover{background:rgba(255,255,255,.12)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:22px 18px 60px}
+  .banner{padding:10px 14px;border-radius:9px;font-size:12.5px;margin-bottom:16px}
+  .banner.warn{background:#fffbeb;color:#854d0e;border:1px solid #fde68a}
+  .grid{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:780px){.grid{grid-template-columns:340px 1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px}
+  .card h2{font-size:14px;color:var(--navy);font-weight:800;margin-bottom:14px;
+    text-transform:uppercase;letter-spacing:.04em}
+  .field{margin-bottom:13px}
+  .hint{font-size:11px;color:var(--mut);margin-top:4px}
+  .msg{font-size:12.5px;margin-top:10px;min-height:16px}
+  .msg.ok{color:var(--green)}.msg.err{color:var(--red)}
+
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--mut);
+    letter-spacing:.04em;padding:8px 10px;border-bottom:2px solid var(--line)}
+  td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .tier{display:inline-block;background:var(--gold);color:#23180a;font-weight:800;
+    padding:2px 9px;border-radius:20px;font-size:11px}
+  .ulist{font-weight:700}.usub{font-size:11px;color:var(--mut)}
+  .rowbtns{display:flex;gap:6px;justify-content:flex-end}
+  .mini{padding:5px 9px;border:1px solid var(--line);background:#fff;border-radius:7px;
+    cursor:pointer;font-size:11.5px;color:var(--navy)}
+  .mini:hover{background:#f1f5f9}
+  .mini.del{color:var(--red);border-color:#fecaca}
+  .mini.del:hover{background:var(--redbg)}
+  .empty{color:var(--mut);font-style:italic;text-align:center;padding:24px 0}
+  .editing{background:#fffbeb;border:1px solid #fde68a;padding:8px 11px;border-radius:8px;
+    font-size:12px;color:#854d0e;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .editing button{background:none;border:none;color:#854d0e;cursor:pointer;text-decoration:underline;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN ADMIN -->
+<div id="login">
+  <div class="lcard">
+    <div class="brand"><span class="dot"></span><b>AEVOR ROBOTICS</b></div>
+    <div class="ltitle">Administración</div>
+    <div class="lsub">Gestión de distribuidores del portal de precios.</div>
+    <label for="ap">Contraseña de administrador</label>
+    <input class="inp" id="ap" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn" id="loginBtn">Entrar</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="app" class="hidden">
+  <header>
+    <div class="l"><span class="dot"></span><span class="nm">AEVOR ROBOTICS</span><span class="tag">Administración</span></div>
+    <button class="lo" id="logout">Salir</button>
+  </header>
+  <div class="wrap">
+    <div id="persistWarn" class="banner warn hidden">
+      ⚠️ Dropbox no está configurado en el servidor. Puedes ver los distribuidores, pero los cambios no se guardarán. Configura <code>DROPBOX_REFRESH_TOKEN</code> en Render.
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h2 id="formTitle">Alta de distribuidor</h2>
+        <div id="editingBox" class="editing hidden">
+          <span>Editando: <b id="editingUser"></b></span>
+          <button id="cancelEdit">cancelar</button>
+        </div>
+        <div class="field">
+          <label for="f-user">Usuario</label>
+          <input class="inp" id="f-user" placeholder="robotica-sur">
+          <div class="hint">Minúsculas, números y guiones. Es lo que escribe para entrar.</div>
+        </div>
+        <div class="field">
+          <label for="f-name">Nombre del distribuidor</label>
+          <input class="inp" id="f-name" placeholder="Robótica Sur S.L.">
+        </div>
+        <div class="field">
+          <label for="f-tier">Nivel (tier)</label>
+          <select class="inp" id="f-tier"></select>
+          <div class="hint">Determina el descuento sobre el PVP.</div>
+        </div>
+        <div class="field">
+          <label for="f-pass">Contraseña</label>
+          <input class="inp" id="f-pass" type="text" placeholder="Contraseña del distribuidor">
+          <div class="hint" id="passHint">Se guarda cifrada. Al editar, déjala vacía para no cambiarla.</div>
+        </div>
+        <button class="btn" id="saveBtn">Crear distribuidor</button>
+        <div class="msg" id="formMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>Distribuidores <span id="count" style="color:var(--mut);font-weight:600"></span></h2>
+        <div id="listHost"><div class="empty">Cargando…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let TOKEN = sessionStorage.getItem('aevor_admin_tok') || '';
+let TIERS = ['SIN','C','C+','B','A','A+'];
+let editingUser = null;
+
+// ---- login ----
+async function doLogin(){
+  const err=$('lerr'); err.textContent=''; const btn=$('loginBtn');
+  const password=$('ap').value;
+  if(!password){err.textContent='Indica la contraseña.';return;}
+  btn.disabled=true; btn.textContent='Entrando…';
+  try{
+    const r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error');
+    TOKEN=j.token; sessionStorage.setItem('aevor_admin_tok',TOKEN);
+    enterApp();
+  }catch(e){ err.textContent=e.message; }
+  finally{ btn.disabled=false; btn.textContent='Entrar'; }
+}
+$('loginBtn').onclick=doLogin;
+$('ap').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+$('logout').onclick=()=>{ sessionStorage.removeItem('aevor_admin_tok'); location.reload(); };
+
+// ---- app ----
+async function enterApp(){
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await loadList();
+}
+function authH(){ return {'Authorization':'Bearer '+TOKEN}; }
+
+async function loadList(){
+  try{
+    const r=await fetch('/api/admin/distributors',{headers:authH()});
+    if(r.status===401){ sessionStorage.removeItem('aevor_admin_tok'); location.reload(); return; }
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error');
+    TIERS=j.tiers||TIERS;
+    fillTiers();
+    $('persistWarn').classList.toggle('hidden', !!j.persisted);
+    renderList(j.distributors||[]);
+  }catch(e){ $('listHost').innerHTML='<div class="empty">'+e.message+'</div>'; }
+}
+function fillTiers(){
+  const sel=$('f-tier');
+  if(sel.options.length) return;
+  TIERS.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+}
+function renderList(list){
+  $('count').textContent='('+list.length+')';
+  if(list.length===0){ $('listHost').innerHTML='<div class="empty">Aún no hay distribuidores. Crea el primero.</div>'; return; }
+  let html='<table><thead><tr><th>Distribuidor</th><th>Nivel</th><th></th></tr></thead><tbody>';
+  list.forEach(d=>{
+    html+='<tr><td><div class="ulist">'+esc(d.name)+'</div><div class="usub">'+esc(d.user)+'</div></td>'
+      +'<td><span class="tier">'+esc(d.tier)+'</span></td>'
+      +'<td><div class="rowbtns">'
+      +'<button class="mini" data-edit="'+esc(d.user)+'">Editar</button>'
+      +'<button class="mini del" data-del="'+esc(d.user)+'" data-name="'+esc(d.name)+'">Baja</button>'
+      +'</div></td></tr>';
+  });
+  html+='</tbody></table>';
+  $('listHost').innerHTML=html;
+  $('listHost').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>startEdit(b.getAttribute('data-edit'),list));
+  $('listHost').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>doDelete(b.getAttribute('data-del'),b.getAttribute('data-name')));
+}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+// ---- create / edit ----
+function startEdit(user,list){
+  const d=list.find(x=>x.user===user); if(!d)return;
+  editingUser=user;
+  $('f-user').value=d.user; $('f-user').disabled=true;
+  $('f-name').value=d.name; $('f-tier').value=d.tier; $('f-pass').value='';
+  $('formTitle').textContent='Editar distribuidor';
+  $('saveBtn').textContent='Guardar cambios';
+  $('passHint').textContent='Déjala vacía para no cambiar la contraseña.';
+  $('editingBox').classList.remove('hidden'); $('editingUser').textContent=d.user;
+  $('f-name').focus();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetForm(){
+  editingUser=null;
+  $('f-user').value=''; $('f-user').disabled=false;
+  $('f-name').value=''; $('f-pass').value=''; if($('f-tier').options.length)$('f-tier').selectedIndex=0;
+  $('formTitle').textContent='Alta de distribuidor';
+  $('saveBtn').textContent='Crear distribuidor';
+  $('passHint').textContent='Se guarda cifrada. Al editar, déjala vacía para no cambiarla.';
+  $('editingBox').classList.add('hidden');
+  $('formMsg').textContent='';
+}
+$('cancelEdit').onclick=resetForm;
+
+$('saveBtn').onclick=async()=>{
+  const msg=$('formMsg'); msg.className='msg'; msg.textContent='';
+  const body={ user:$('f-user').value, name:$('f-name').value, tier:$('f-tier').value, password:$('f-pass').value };
+  const btn=$('saveBtn'); btn.disabled=true;
+  try{
+    const r=await fetch('/api/admin/distributors',{method:'POST',headers:{'Content-Type':'application/json',...authH()},
+      body:JSON.stringify(body)});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error');
+    msg.className='msg ok';
+    msg.textContent = j.created ? 'Distribuidor creado.' : 'Cambios guardados.';
+    resetForm();
+    await loadList();
+  }catch(e){ msg.className='msg err'; msg.textContent=e.message; }
+  finally{ btn.disabled=false; }
+};
+
+async function doDelete(user,name){
+  if(!confirm('¿Dar de baja a "'+name+'"? Perderá el acceso al portal de inmediato.')) return;
+  try{
+    const r=await fetch('/api/admin/distributors/'+encodeURIComponent(user),{method:'DELETE',headers:authH()});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Error');
+    if(editingUser===user) resetForm();
+    await loadList();
+  }catch(e){ alert(e.message); }
+}
+
+// ---- boot ----
+if(TOKEN){
+  fetch('/api/admin/distributors',{headers:authH()}).then(r=>{
+    if(r.ok) enterApp(); else sessionStorage.removeItem('aevor_admin_tok');
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>
